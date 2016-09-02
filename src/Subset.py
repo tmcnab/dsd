@@ -3,6 +3,7 @@ import unittest
 
 class Subset(object):
     """docstring for Subset."""
+
     def __init__(self, arg):
         super(Subset, self).__init__()
         self.arg = arg

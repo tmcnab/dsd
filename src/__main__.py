@@ -1,7 +1,7 @@
-import sys
-import test
+from cluster import Cluster
+from store import Store
 
-
-argv = sys.argv
-if 'test' in argv:
-    test.test()
+cluster = Cluster()
+store = Store(cluster)
+o = {'name': 'Alice'}
+store.add_object(o)
