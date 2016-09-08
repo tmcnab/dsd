@@ -1,25 +1,13 @@
 package main
 
-import (
-	"log"
-	"os"
-)
-
-func preflight() bool {
-	os.Mkdir(".data", 0777)
-	return true
-}
+import "log"
 
 func main() {
-	wd, err := os.Getwd()
-	if err == nil {
-		log.Print("out", "working directory", wd)
-	} else {
-		log.Fatal("out", "if I cannot Getcwd then wtf")
-	}
-
+	engine := Engine{}
 	server := Server{}
-	if !server.Start() {
-		os.Exit(-1)
+
+	err := server.Start(&engine)
+	if err != nil {
+		log.Fatal("couldn't start the server")
 	}
 }
