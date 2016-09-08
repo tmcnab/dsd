@@ -1,17 +1,33 @@
 package main
 
 import (
+	"crypto/sha256"
 	"os"
 	"path"
 )
 
-// GetFile returns a file (or error) in the dsd directory.
-func GetFile(name string) (file os.File, err error) {
-	wd, err := os.Getwd()
-	if err != null {
-		return
-	}
+// HashString converts the provided string into 32-byte buffer.
+func HashString(str string) (hash []byte) {
+	function := sha256.New()
+	function.Write([]byte(str))
+	return function.Sum(nil)
+}
 
-	filename = path.Join(wd, ".data", name)
-	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777)
+// GetFile returns a file (or error) in the dsd directory.
+func GetFile(name string) (file *os.File, err error) {
+	wd, err := os.Getwd()
+	if err == nil {
+		filename := path.Join(wd, ".data", name)
+		file, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0777)
+	}
+	return
+}
+
+func GetFileStat(name string) (info os.FileInfo, err error) {
+	file, err := GetFile(name)
+	if err == nil {
+		defer file.Close()
+		info, err = file.Stat()
+	}
+	return
 }
