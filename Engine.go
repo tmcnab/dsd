@@ -2,23 +2,13 @@ package main
 
 import (
 	"errors"
-	"time"
+	"os"
 )
-
-type hashlogEntry struct {
-	hash uint64
-	time time.Time // 16 bytes
-}
-
-type datalogEntry struct {
-	object interface{}
-}
 
 // The Engine is the blood and guts of the database system.
 type Engine struct {
-	test     bool
-	lastTime time.Time // A timestamp of when the last object was writen to file.
-	hashlog  []hashlogEntry
+	test bool
+	log  MetaLog // the only memory resident part of the data store
 }
 
 // Execute the given input and produce an output.
@@ -34,11 +24,42 @@ func (engine *Engine) Execute(input EngineInput) (output EngineOutput) {
 }
 
 // Insert an object into the set.
+//
+// 2. Update files
+//		a. Append timestamp and hash into metalog, update in-memory metalog
+//		b. Append object to file
 func (engine *Engine) insert(input *EngineInput, output *EngineOutput) {
-	// 1. Compute hash:
-	// 		a. if in primary index, return hash
-	// 		b. if not, proceed with insert
-	// 2. Update files
-	//		a. Append timestamp and hash into HASHLOG, update in-memory HASHLOG
-	//		b. Insert object
+	var file *os.File
+	var entry MetaLogEntry
+	object := &(Object(input.arg))
+
+	// 1. Compute hash and check for existence. If in metalog, return entry.
+	entry.hash, err = object.Hash()
+	meta := engine.log.GetObjectByHash(entry.hash)
+	if meta != nil {
+		output.objects = append(output.objects, meta)
+		return
+	}
+
+	// 2. Open object file.
+	file, output.error = GetFile("objects")
+	if output.error != nil {
+		return
+	}
+
+	// 3. Seek to end, store the seek position.
+	entry.seek, output.error = file.Seek(0, os.SEEK_END)
+	if output.error != nil {
+		return
+	}
+
+	// 4. Convert object to bytes
+	data, output.error := object.Encode()
+	if output.error != nil {
+		return
+	}
+
+	// 5. Write to file
+	// meta.size = data.
+
 }
