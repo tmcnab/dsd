@@ -9,13 +9,18 @@ import (
 type MetaLogEntry struct {
 	hash []byte    // The hash of the object.
 	seek int64     // The position in the object data file where the object starts
-	size uint64    // The size of the object in bytes
+	size int64     // The size of the object in bytes
 	time time.Time // When the object was inserted.
 }
 
 // The MetaLog is the actual log of items, ordered by timestamp (maybe?)
 type MetaLog struct {
 	entries []MetaLogEntry
+}
+
+// Append a log entry to the log.
+func (log *MetaLog) Append(entry MetaLogEntry) {
+	log.entries = append(log.entries, entry)
 }
 
 // Flush persists the metalog to media.

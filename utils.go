@@ -22,12 +22,3 @@ func GetFile(name string) (file *os.File, err error) {
 	}
 	return
 }
-
-func GetFileStat(name string) (info os.FileInfo, err error) {
-	file, err := GetFile(name)
-	if err == nil {
-		defer file.Close()
-		info, err = file.Stat()
-	}
-	return
-}
