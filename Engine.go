@@ -13,6 +13,19 @@ type Engine struct {
 	log  MetaLog // the only memory resident part of the data store
 }
 
+// EngineInput represents data that a client sends to the server.
+type EngineInput struct {
+	arg Object
+	op  string
+	ver float64
+}
+
+// EngineOutput represents what gets sent back to the client.
+type EngineOutput struct {
+	error error
+	data  map[string]interface{}
+}
+
 // Execute the given input and produce an output.
 func (engine *Engine) Execute(input EngineInput) (output EngineOutput) {
 	switch input.op {
