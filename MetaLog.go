@@ -39,6 +39,6 @@ func (log *MetaLog) GetObjectByHash(hash []byte) (entry *MetaLogEntry) {
 }
 
 // Since returns the index of the first entry which is after the given time.
-func (log *MetaLog) Since(from time.Time) (index uint64) {
-	return 0
+func (log *MetaLog) Since(from time.Time, max uint64) (count uint64, objects []MetaLogEntry) {
+	return
 }

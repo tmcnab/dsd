@@ -1,7 +1,7 @@
 package main
 
-// EngineOutput represents ...
+// EngineOutput represents what gets sent back to the client.
 type EngineOutput struct {
-	error   error
-	objects []interface{}
+	error error
+	data  map[string]interface{}
 }
