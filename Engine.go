@@ -13,27 +13,27 @@ type Engine struct {
 	test bool
 }
 
-// EngineInput represents data that a client sends to the server.
-type EngineInput struct {
+// Request represents data that a client sends to the server.
+type Request struct {
 	arg Object
 	op  string
 	ver float64
 }
 
-// EngineOutput represents what gets sent back to the client.
-type EngineOutput struct {
+// Response represents what gets sent back to the client.
+type Response struct {
 	error error
 	data  map[string]interface{}
 }
 
 // Execute the given input and produce an output.
-func (engine *Engine) Execute(input EngineInput) (output EngineOutput) {
+func (engine *Engine) Execute(input Request) (output Response) {
 	switch input.op {
 	case "insert":
 		engine.insert(&input, &output)
 		break
 	default:
-		return EngineOutput{error: errors.New("unsupported operation")}
+		return Response{error: errors.New("unsupported operation")}
 	}
 	return
 }
@@ -44,7 +44,7 @@ func NewEngine() (engine *Engine) {
 }
 
 // Insert an object into the set, let peers know.
-func (engine *Engine) insert(input *EngineInput, output *EngineOutput) {
+func (engine *Engine) insert(input *Request, output *Response) {
 	// 1. Compute hash and check for existence. If in metalog, return entry to client.
 	var entry MetaLogEntry
 	object := Object(input.arg)
@@ -101,7 +101,7 @@ func (engine *Engine) insert(input *EngineInput, output *EngineOutput) {
 //
 // This function is primarily used by other nodes in the cluster to update
 // their own state. Perhaps on a backing-off polling loop.
-func (engine *Engine) since(input *EngineInput, output *EngineOutput) {
+func (engine *Engine) since(input *Request, output *Response) {
 	// 1. Get 'since' command argument.
 	var timestamp time.Time
 	timestamp, output.error = Convert2Time(input.arg["since"])

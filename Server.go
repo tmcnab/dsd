@@ -35,13 +35,13 @@ func (server *Server) Stop() {
 func handleConnection(conn net.Conn, engine *Engine) {
 	defer conn.Close()
 
-	var input EngineInput
+	var input Request
 	decoder := json.NewDecoder(conn)
 	encoder := json.NewEncoder(conn)
 	err := decoder.Decode(&input)
 	if err != nil {
 		log.Println("err", err.Error())
-		encoder.Encode(EngineOutput{error: err})
+		encoder.Encode(Response{error: err})
 		return
 	}
 
