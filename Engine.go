@@ -9,8 +9,8 @@ import (
 
 // The Engine is the blood and guts of the database system.
 type Engine struct {
-	test bool
 	log  MetaLog // the only memory resident part of the data store
+	test bool
 }
 
 // EngineInput represents data that a client sends to the server.
@@ -38,9 +38,13 @@ func (engine *Engine) Execute(input EngineInput) (output EngineOutput) {
 	return
 }
 
+// NewEngine creates and initializes an Engine struct.
+func NewEngine() (engine *Engine) {
+	return &Engine{}
+}
+
 // Insert an object into the set, let peers know.
 func (engine *Engine) insert(input *EngineInput, output *EngineOutput) {
-
 	// 1. Compute hash and check for existence. If in metalog, return entry to client.
 	var entry MetaLogEntry
 	object := Object(input.arg)
