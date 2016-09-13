@@ -1,21 +1,45 @@
 package main
 
 import (
+	"flag"
 	"net"
+	"strings"
 	"time"
 )
 
-// A _Peer represents
-type _Peer struct {
-	addr net.Addr
+// A Peer represents
+type Peer struct {
+	addr net.IP
 	name string
 	time time.Time
 }
 
 // A Cluster represents a group of fault-tolerant replicating nodes.
 type Cluster struct {
-	peers     _Peer
+	engine    *Engine
 	operating bool
+	peers     []Peer
+	port      int
+}
+
+// NewCluster creates and initializes the Cluster struct.
+func NewCluster(engine *Engine) (cluster *Cluster) {
+	ipstr := *flag.String("--peers", "",
+		"comma-separated string of IP addresses")
+	items := strings.Split(ipstr, ",")
+	count := len(items)
+	peers := make([]Peer, count)
+
+	for index := 0; index < count; index++ {
+		peer := Peer{}
+		peer.addr = net.ParseIP(items[index])
+		peers[index] = peer
+	}
+
+	port := *flag.Int("--port", 13579,
+		"integer, port which clients and peers communicate over")
+
+	return &Cluster{engine: engine, operating: false, peers: peers, port: port}
 }
 
 // Start the cluster synchronizing with peer nodes.
@@ -31,11 +55,24 @@ func (cluster *Cluster) Stop() {
 }
 
 func (cluster *Cluster) loop() {
-	for {
-		// ask a peer for data
+	duration := time.Millisecond * time.Duration(*flag.Int64("interval", 500, "integer, milliseconds"))
 
-		if !cluster.operating {
+	for {
+		for _, peer := range cluster.peers {
+			cluster.poll(&peer)
+		}
+
+		if cluster.operating {
+			time.Sleep(duration)
+		} else {
 			break
 		}
+	}
+}
+
+func (cluster *Cluster) poll(peer *Peer) {
+	_, err := net.Dial("tcp", (*peer).addr.String())
+	if err == nil {
+		// Have a chat with the peer. See docs/Replication
 	}
 }
