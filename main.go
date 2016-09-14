@@ -5,12 +5,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"./src/dsd"
 )
 
 func main() {
-	engine := Engine{}
-	cluster := Cluster{}
-	server := Server{}
+	engine := dsd.Engine{}
+	cluster := dsd.Cluster{}
+	server := dsd.Server{}
 
 	err := server.Start(&engine)
 	if err == nil {
@@ -22,6 +24,6 @@ func main() {
 			cluster.Stop()
 		}()
 	} else {
-		log.Fatal("couldn't start the server", err.Error())
+		log.Fatal("err [main] couldn't start the server: " + err.Error())
 	}
 }
