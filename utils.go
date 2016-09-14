@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -45,4 +46,12 @@ func InterfaceToNumber(data interface{}) (n Number, err error) {
 func ToString(data interface{}) (s string, err error) {
 	// TODO
 	return
+}
+
+func LogInfo(from string, str string) {
+	log.Println("out [" + from + "] " + str)
+}
+
+func LogError(from string, err error) {
+	log.Println("err [" + from + "] " + err.Error())
 }

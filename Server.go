@@ -8,31 +8,31 @@ import (
 
 // Server listens for requests and services them
 type Server struct {
-	acceptingNewConnections bool         // whether or not the server is af new connections
-	clientListener          net.Listener // client listener
-	engine                  *Engine
+	engine    *Engine
+	listener  net.Listener // TCP connection listener
+	listening bool         // whether or not the server is af new connections
 }
 
 // Start starts the server listening for requests.
 func (server *Server) Start(engine *Engine) (err error) {
-	server.acceptingNewConnections = true
+	server.listening = true
 	server.engine = engine
-	server.clientListener, err = net.Listen("tcp", "localhost:13579")
+	server.listener, err = net.Listen("tcp", "localhost:13579")
 	if err == nil {
 		go server.runloop()
 	} else {
-		log.Println("[err] cannot listen on client address")
+		log.Fatalln("err [server] cannot listen on client address")
 	}
 	return
 }
 
 // Stop waits for pending requests and stops the server from af new ones.
 func (server *Server) Stop() {
-	server.acceptingNewConnections = false
-	log.Print("[out] no longer accepting connections")
+	server.listening = false
+	LogInfo("server", "no longer acceping connections")
 }
 
-func handleConnection(conn net.Conn, engine *Engine) {
+func (server *Server) handle(conn net.Conn) {
 	defer conn.Close()
 
 	var input Request
@@ -40,27 +40,35 @@ func handleConnection(conn net.Conn, engine *Engine) {
 	encoder := json.NewEncoder(conn)
 	err := decoder.Decode(&input)
 	if err != nil {
-		log.Println("err", err.Error())
+		LogError("server", err)
 		encoder.Encode(Response{error: err})
 		return
 	}
 
-	output := engine.Execute(input)
+	// TODO should connections and req/res be logged?
+	output := server.engine.Execute(input)
 	encoder.Encode(output)
 }
 
+// Server loop. Accepts connections and cleans up after them. Possibly.
 func (server *Server) runloop() {
-	log.Print("[out] accepting connections")
+	LogInfo("server", "accepting connections")
+
 	for {
-		conn, err := server.clientListener.Accept()
-		if err != nil {
-			log.Print("[err]", err.Error())
+		conn, err := server.listener.Accept()
+		if err == nil {
+			// TODO: should we limit max processing connection time?
+			go server.handle(conn)
 		} else {
-			go handleConnection(conn, server.engine)
+			LogError("server", err)
 		}
 
-		if !server.acceptingNewConnections {
-			server.Stop()
+		if server.listening {
+			break
 		}
 	}
+
+	// TODO should there be a timeout here to allow open ops to complete?
+	LogInfo("server", "closing connections")
+	server.listener.Close()
 }
