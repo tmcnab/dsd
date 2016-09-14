@@ -48,10 +48,12 @@ func ToString(data interface{}) (s string, err error) {
 	return
 }
 
+// LogInfo logs an informational message.
 func LogInfo(from string, str string) {
 	log.Println("out [" + from + "] " + str)
 }
 
+// LogError logs an error.
 func LogError(from string, err error) {
 	log.Println("err [" + from + "] " + err.Error())
 }

@@ -9,8 +9,7 @@ import (
 
 // The Engine is the blood and guts of the database system.
 type Engine struct {
-	log  MetaLog // the only memory resident part of the data store
-	test bool
+	log *MetaLog // the only memory resident part of the data store
 }
 
 // Request represents data that a client sends to the server.
@@ -40,7 +39,8 @@ func (engine *Engine) Execute(input Request) (output Response) {
 
 // NewEngine creates and initializes an Engine struct.
 func NewEngine() (engine *Engine) {
-	return &Engine{}
+	log := NewMetaLog()
+	return &Engine{log: log}
 }
 
 // Insert an object into the set, let peers know.
@@ -50,7 +50,7 @@ func (engine *Engine) insert(input *Request, output *Response) {
 	object := Object(input.arg)
 	entry.hash, output.error = object.Hash()
 	if output.error == nil {
-		meta := engine.log.GetObjectByHash(entry.hash)
+		meta := engine.log.GetMetaByHash(entry.hash)
 		if meta != nil {
 			// TODO convert meta to map[string]interface{}
 			return
