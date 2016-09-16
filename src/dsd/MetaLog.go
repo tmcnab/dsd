@@ -2,10 +2,11 @@ package dsd
 
 import (
 	"encoding/gob"
-	"log"
 	"reflect"
 	"time"
 )
+
+const _MetaLogFileName = "metalog"
 
 // A MetaLogEntry chronicles an object inserted into the database.
 type MetaLogEntry struct {
@@ -20,25 +21,26 @@ type MetaLog struct {
 	// logicalTime is a logical timestamp. Every time an object is inserted the counter is incremented
 	logicalTime uint64
 	entries     []MetaLogEntry
+	settings    *Settings
 }
 
 // NewMetaLog creates an initializes a new MetaLog type.
 func NewMetaLog() (metaLog *MetaLog) {
-	file, err := GetFile("meta.log")
+	metaLog = &MetaLog{}
+	metaLog.settings = NewSettings()
+
+	// If the decoder throws it's probably because there's no data. If that's
+	// the case then return a new one. TODO make sure this assumption is true.
+	file, err := metaLog.settings.GetFile(_MetaLogFileName)
 	if err == nil {
-		// If the decoder throws it's probably because there's no data. If that's
-		// the case then return a new one. TODO make sure this assumption is true.
 		if gob.NewDecoder(file).Decode(metaLog) != nil {
-			var logicalTime uint64
-			entries := make(MetaLogEntry, 0)
-			metaLog = &MetaLog{
-				entries:     entries,
-				logicalTime: logicalTime,
-			}
+			metaLog.entries = make([]MetaLogEntry, 0)
+			metaLog.logicalTime = 0
 		}
 	} else {
-		log.Fatalln("err [metalog] cannot open metalog file")
+		LogError("metalog", err)
 	}
+
 	return
 }
 
@@ -49,7 +51,7 @@ func (log *MetaLog) Append(entry MetaLogEntry) {
 
 // Flush persists the metalog to media.
 func (log *MetaLog) Flush() (err error) {
-	file, err := GetFile("meta.log")
+	file, err := log.settings.GetFile(_MetaLogFileName)
 	if err == nil {
 		defer file.Close()
 		err = gob.NewEncoder(file).Encode(log)

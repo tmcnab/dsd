@@ -9,7 +9,16 @@ import (
 
 // The Engine is the blood and guts of the database system.
 type Engine struct {
-	log *MetaLog // the only memory resident part of the data store
+	log      *MetaLog // the only memory resident part of the data store
+	settings *Settings
+}
+
+// NewEngine creates and initializes an Engine struct.
+func NewEngine() *Engine {
+	engine := Engine{}
+	engine.log = NewMetaLog()
+	engine.settings = NewSettings()
+	return &engine
 }
 
 // Request represents data that a client sends to the server.
@@ -35,12 +44,6 @@ func (engine *Engine) Execute(input Request) (output Response) {
 		return Response{error: errors.New("unsupported operation")}
 	}
 	return
-}
-
-// NewEngine creates and initializes an Engine struct.
-func NewEngine() (engine *Engine) {
-	log := NewMetaLog()
-	return &Engine{log: log}
 }
 
 // Insert an object into the set, let peers know.
@@ -70,7 +73,8 @@ func (engine *Engine) insert(input *Request, output *Response) {
 
 	// 3. Open object file.
 	var file *os.File
-	file, output.error = GetFile("objects")
+	settings := NewSettings()
+	file, output.error = settings.GetFile("objects")
 	if output.error != nil {
 		return
 	}
