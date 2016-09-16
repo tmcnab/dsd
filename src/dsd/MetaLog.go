@@ -10,7 +10,7 @@ const _MetaLogFileName = "metalog"
 
 // A MetaLogEntry chronicles an object inserted into the database.
 type MetaLogEntry struct {
-	hash [16]byte  // The hash of the object.
+	hash Hash      // The hash of the object.
 	seek int64     // The position in the object data file where the object starts
 	size int64     // The size of the object in bytes
 	time time.Time // When the object was inserted.
@@ -60,7 +60,7 @@ func (log *MetaLog) Flush() (err error) {
 }
 
 // GetMetaByHash gets the object metadata by it's hash.
-func (log *MetaLog) GetMetaByHash(hash []byte) (entry *MetaLogEntry) {
+func (log *MetaLog) GetMetaByHash(hash Hash) (entry *MetaLogEntry) {
 	// TODO instead of a slice, log.entries should be stored using a tree
 	// or better lookup structure other than iterating over the whole
 	// damn list.

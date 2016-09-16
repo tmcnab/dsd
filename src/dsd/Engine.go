@@ -53,8 +53,8 @@ func (engine *Engine) insert(input *Request, output *Response) {
 	object := Object(input.arg)
 	entry.hash, output.error = object.Hash()
 	if output.error == nil {
-		meta := engine.log.GetMetaByHash(entry.hash)
-		if meta != nil {
+		entry := engine.log.GetMetaByHash(entry.hash)
+		if entry != nil {
 			// TODO convert meta to map[string]interface{}
 			return
 		}

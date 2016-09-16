@@ -13,17 +13,24 @@ type Server struct {
 	listening bool         // whether or not the server is af new connections
 }
 
-// Start starts the server listening for requests.
-func (server *Server) Start(engine *Engine) (err error) {
-	server.listening = true
+// NewServer creates and initializes a new Server type.
+func NewServer(engine *Engine) (server *Server) {
+	server = &Server{}
 	server.engine = engine
+	server.listening = false
+	return
+}
+
+// Start starts the server listening for requests.
+func (server *Server) Start() {
+	var err error
+	server.listening = true
 	server.listener, err = net.Listen("tcp", "localhost:13579")
 	if err == nil {
 		go server.runloop()
 	} else {
 		log.Fatalln("err [server] cannot listen on client address")
 	}
-	return
 }
 
 // Stop waits for pending requests and stops the server from af new ones.

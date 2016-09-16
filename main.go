@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,20 +9,17 @@ import (
 )
 
 func main() {
-	engine := dsd.Engine{}
-	cluster := dsd.Cluster{}
-	server := dsd.Server{}
+	engine := dsd.NewEngine()
+	cluster := dsd.NewCluster(engine)
+	server := dsd.NewServer(engine)
 
-	err := server.Start(&engine)
-	if err == nil {
-		channel := make(chan os.Signal, 2)
-		signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			<-channel
-			server.Stop()
-			cluster.Stop()
-		}()
-	} else {
-		log.Fatal("err [main] couldn't start the server: " + err.Error())
-	}
+	channel := make(chan os.Signal, 2)
+	signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-channel
+		server.Stop()
+		cluster.Stop()
+	}()
+
+	server.Start()
 }

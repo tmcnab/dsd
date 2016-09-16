@@ -24,6 +24,6 @@ func (object *Object) Encode() (buffer *bytes.Buffer, err error) {
 }
 
 // Hash an object into a N-byte array.
-func (object *Object) Hash() (hash []byte, err error) {
+func (object *Object) Hash() (hash Hash, err error) {
 	return
 }
