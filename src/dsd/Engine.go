@@ -85,6 +85,8 @@ func (engine *Engine) insert(input *Request, output *Response) {
 		return
 	}
 
+	// TODO: lock metadata file
+
 	// 5. Write object data to file.
 	_, output.error = file.Write(data.Bytes())
 	if output.error != nil {
