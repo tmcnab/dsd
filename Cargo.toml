@@ -1,0 +1,6 @@
+[package]
+name = "dsd"
+version = "0.1.0"
+authors = ["Tristan McNab <tristan.j.mcnab@gmail.com>"]
+
+[dependencies]
